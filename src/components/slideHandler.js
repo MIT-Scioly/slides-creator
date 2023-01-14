@@ -1,5 +1,7 @@
+import {v4 as uuidv4} from 'uuid';
+
 export const createPresentation = (token, title) => {
-  const info = {
+  return fetch("https://slides.googleapis.com/v1/presentations", {
     method: "post",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -7,32 +9,7 @@ export const createPresentation = (token, title) => {
     body: JSON.stringify({
       title: title,
     }),
-  };
-  return fetch("https://slides.googleapis.com/v1/presentations", info);
-};
-
-export const addSlide = (token, presentationId, value) => {
-  return fetch(
-    `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        requests: [
-          {
-            createSlide: {
-              slideLayoutReference: {
-                predefinedLayout: "TITLE_AND_BODY",
-              }
-            },
-          },
-        ],
-      }),
-    }
-  );
+  });
 };
 
 export const getPresentationObject = (token, presentationId) => {
@@ -47,7 +24,8 @@ export const getPresentationObject = (token, presentationId) => {
     }
   );
 }
-export const addText = (token, presentationId, objectId, value) => {
+
+export const batchUpdateSlides = (token, presentationId, requests) => {
   return fetch(
     `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`,
     {
@@ -57,16 +35,58 @@ export const addText = (token, presentationId, objectId, value) => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        requests: [
-          {
-            insertText: {
-              objectId: objectId,
-              text: value,
-            },
-          },
-        ],
+        requests: requests,
       }),
     }
   );
+}
+
+export const insertTextWithDataRequest = (id, body) => {
+  return {
+    insertText: {
+      objectId: id,
+      text: body,
+    }
+  };
+}
+export const createNewSlideWithDataRequest = (title, body) => {
+  // run this on every combination of title and body, and append it to the request of the other thing.
+  const titleId = uuidv4();
+  const bodyId = uuidv4();
+  return [
+    {
+      createSlide: {
+        slideLayoutReference: {
+          predefinedLayout: "TITLE_AND_BODY",
+        },
+        placeholderIdMappings: [
+          {
+            layoutPlaceholder: {
+              type: "TITLE",
+            },
+            objectId: titleId,
+          },
+          {
+            layoutPlaceholder: {
+              type: "BODY",
+            },
+            objectId: bodyId,
+          },
+        ]
+      }
+    },
+    {
+      insertText: {
+        objectId: titleId,
+        text: title,
+      }
+    },
+    {
+      insertText: {
+        objectId: bodyId,
+        text: body,
+      }
+    }
+  ]
 }
 
