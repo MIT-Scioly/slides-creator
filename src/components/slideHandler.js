@@ -47,20 +47,6 @@ export const getPresentationObject = (token, presentationId) => {
     }
   );
 }
-
-export const getSlideObjects = (token, presentationId, slideId) => {
-  return fetch(
-    `https://slides.googleapis.com/v1/presentations/${presentationId}/slides/id.${slideId}`,
-    {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({}),
-    }
-  );
-}
 export const addText = (token, presentationId, objectId, value) => {
   return fetch(
     `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`,
