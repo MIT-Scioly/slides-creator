@@ -8,7 +8,6 @@ export const createSlide = (token, title) => {
       title: title,
     }),
   };
-  console.log(info);
   return fetch("https://slides.googleapis.com/v1/presentations", info);
 };
 
