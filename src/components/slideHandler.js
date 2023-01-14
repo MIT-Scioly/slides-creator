@@ -1,4 +1,4 @@
-export const createSlide = (token, title) => {
+export const createPresentation = (token, title) => {
   const info = {
     method: "post",
     headers: {
@@ -11,37 +11,76 @@ export const createSlide = (token, title) => {
   return fetch("https://slides.googleapis.com/v1/presentations", info);
 };
 
-export const updateSheetValue = (token, sheetId, value) => {
-    return fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          requests: [
-            {
-              repeatCell: {
-                range: {
-                  startColumnIndex: 0,
-                  endColumnIndex: 1,
-                  startRowIndex: 0,
-                  endRowIndex: 1,
-                  sheetId: 0,
-                },
-                cell: {
-                  userEnteredValue: {
-                    numberValue: value,
-                  },
-                },
-                fields: "*",
-              },
+export const addSlide = (token, presentationId, value) => {
+  return fetch(
+    `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        requests: [
+          {
+            createSlide: {
+              slideLayoutReference: {
+                predefinedLayout: "TITLE_AND_BODY",
+              }
             },
-          ],
-        }),
-      }
-    );
-  };
-  
+          },
+        ],
+      }),
+    }
+  );
+};
+
+export const getPresentationObject = (token, presentationId) => {
+  return fetch(
+    `https://slides.googleapis.com/v1/presentations/${presentationId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+}
+
+export const getSlideObjects = (token, presentationId, slideId) => {
+  return fetch(
+    `https://slides.googleapis.com/v1/presentations/${presentationId}/slides/id.${slideId}`,
+    {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({}),
+    }
+  );
+}
+export const addText = (token, presentationId, objectId, value) => {
+  return fetch(
+    `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        requests: [
+          {
+            insertText: {
+              objectId: objectId,
+              text: value,
+            },
+          },
+        ],
+      }),
+    }
+  );
+}
+

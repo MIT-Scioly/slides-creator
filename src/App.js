@@ -1,7 +1,7 @@
 
 import {useState} from "react";
 import * as dfd from "danfojs";
-import SlidesAuth from './SlidesAuth';
+import Slides from './components/Slides';
 
 
 function App() {
@@ -69,7 +69,7 @@ function App() {
         <button onClick={() => getTop10(data, "Detector Building", 10)}>Top 10</button>
         <button onClick={() => getEvents(data)}>Events</button>
         <button onClick={() => getAllEvents(data)}>All Events</button>
-        <SlidesAuth/>
+        <Slides/>
       </header>
     </div>
   );
