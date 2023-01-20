@@ -1,7 +1,7 @@
 import {useState} from "react";
 import * as dfd from "danfojs";
 
-export default function CsvLoader({setCsvData}) {
+export default function CsvLoader({setCsvData, excludeText}) {
   const [file, setFile] = useState(null);
   const changeHandler = (event) => {
     setFile(event.target.files[0]);
@@ -30,7 +30,13 @@ export default function CsvLoader({setCsvData}) {
       console.log("No data");
       return;
     }
-    return df.drop({columns: ["Team", "Team Penalties", "Total"]}).columns;
+    // return df.columns;
+    if (excludeText) {
+      return df.columns.filter((item) => !excludeText.split(",").includes(item));
+    } else {
+      return df.drop({columns: ["Team", "Team Penalties", "Total"]}).columns;
+    }
+    // scioly stuff: ["Team ID", "Group", "w/o SoM", "SoM Rank", "Correct Final Score"]
   }
 
   async function getAllEvents() {

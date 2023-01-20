@@ -4,9 +4,8 @@ import {
   createPresentation,
   getPresentationObject,
   insertTextWithDataRequest,
-  createNewSlideWithDataRequest, batchUpdateSlides
+  createNewSlideWithDataRequest, batchUpdateSlides, deleteTextWithIdRequest
 } from './slideHandler';
-
 
 export default function Slides({csvData}) {
   const [user, setUser] = useState(null);
@@ -31,6 +30,62 @@ export default function Slides({csvData}) {
     const json = await res.json();
     setPresentation(json);
     return json;
+  }
+
+  const ArrToDict = (arr) => {
+    const dict = {};
+    arr.forEach((item) => {
+      // console.log(item)
+      dict[item['Event']] = item['Rankings'];
+    });
+    return dict;
+  }
+
+  const fetchPresentation = async () => {
+    const eventsDict = ArrToDict(csvData);
+    const presentation = await getPresentation();
+    const slides = presentation.slides;
+
+    const requestList = [];
+
+
+
+    for (let i = 0; i < slides.length; i++) {
+      const slide = slides[i];
+      const elements = slide.pageElements;
+      if (elements.length === 7) {
+        let title = elements[0].shape?.text?.textElements[1].textRun.content;
+        if (title) {
+          title = title.trim()
+          if (title in eventsDict) {
+            console.log("title", title)
+            const rankings = eventsDict[title];
+            // console.log("rankings", rankings);
+            // console.log(slide)
+            let bullets = []
+            for (let j = 1; j < elements.length; j++) {
+              bullets.push(elements[j])
+            }
+            // break;
+            // IDs in bullets
+            // rankigns in rankings
+            // push rankings to IDs to requestlist
+            for (let j = 0; j < bullets.length; j++) {
+              let glyph = bullets[j].shape?.text?.textElements[0]?.paragraphMarker?.bullet?.glyph
+              glyph = parseInt(glyph.slice(0, 1))
+              if (glyph !== j + 1) {
+                console.error("glyph", glyph, "j", j, 'NOT MATCHING')
+              }
+              requestList.push(deleteTextWithIdRequest(bullets[j].objectId))
+              requestList.push(insertTextWithDataRequest(bullets[j].objectId, rankings[glyph-1]))
+            }
+          }
+        }
+      }
+    }
+    // TODO: uncomment later
+    const res = await batchUpdateSlides(token, presentationId, requestList);
+    console.log(res);
   }
 
   const createNewPresentation = async (fileName) => {
@@ -98,9 +153,11 @@ export default function Slides({csvData}) {
           <a href={`https://docs.google.com/presentation/d/${presentationId}/edit`} target="_blank" rel="noreferrer">Open
             Presentation Link</a>
           <p/>
-          <button onClick={() => createNewPresentation("SciOly Results")}>Create Presentation</button>
+          {/*<button onClick={() => createNewPresentation("SciOly Results")}>Create Presentation</button>*/}
           <p/>
-          <button onClick={() => addSlideFromCsv(token, presentationId)}>Generate Slides from CSV</button>
+          {/*<button onClick={() => addSlideFromCsv(token, presentationId)}>Generate Slides from CSV</button>*/}
+          <p/>
+          <button onClick={() => fetchPresentation()}>Get Presentation</button>
         </div>}
     </div>
   )

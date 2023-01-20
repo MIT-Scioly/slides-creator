@@ -49,6 +49,15 @@ export const insertTextWithDataRequest = (id, body) => {
     }
   };
 }
+
+export const deleteTextWithIdRequest = (id) => {
+  return {
+    deleteText: {
+      objectId: id,
+    }
+  };
+}
+
 export const createNewSlideWithDataRequest = (title, body) => {
   // run this on every combination of title and body, and append it to the request of the other thing.
   const titleId = uuidv4();
