@@ -17,12 +17,12 @@ function App() {
         <li>Either enter an existing presentation ID.</li>
         <li>Click "Generate Slides from CSV" to generate slides.</li>
       </ol>
-      Enter column names to exclude:
-      <input
-        type="text"
-        name="exclude"
-        onChange={(event) => setExcludeText(event.target.value)}
-      />
+      {/*Enter column names to exclude:*/}
+      {/*<input*/}
+      {/*  type="text"*/}
+      {/*  name="exclude"*/}
+      {/*  onChange={(event) => setExcludeText(event.target.value)}*/}
+      {/*/>*/}
       <CsvLoader setCsvData={setCsvData} excludeText={excludeText}/>
       <p>{csvData ? "Data loaded" : "No data yet"}</p>
       <Slides csvData={csvData}/>

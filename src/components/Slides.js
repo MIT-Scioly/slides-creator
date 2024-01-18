@@ -24,11 +24,13 @@ export default function Slides({csvData}) {
   }
   const getPresentation = async () => {
     if (presentation) {
+      console.log(presentation)
       return presentation;
     }
     const res = await getPresentationObject(token, presentationId);
     const json = await res.json();
     setPresentation(json);
+    console.log(json)
     return json;
   }
 
@@ -36,7 +38,7 @@ export default function Slides({csvData}) {
     const dict = {};
     arr.forEach((item) => {
       // console.log(item)
-      dict[item['Event']] = item['Rankings'];
+      dict[item['Event'].replace("'", "").replace("*","").toLowerCase()] = item['Rankings'];
     });
     return dict;
   }
@@ -56,10 +58,11 @@ export default function Slides({csvData}) {
       if (elements.length === 7) {
         let title = elements[0].shape?.text?.textElements[1].textRun.content;
         if (title) {
-          title = title.trim()
+          title = title.trim().replace("’", "").replace("*","").toLowerCase()
           if (title in eventsDict) {
             console.log("title", title)
             const rankings = eventsDict[title];
+            console.log("rankings", rankings);
             // console.log("rankings", rankings);
             // console.log(slide)
             let bullets = []
@@ -83,6 +86,10 @@ export default function Slides({csvData}) {
         }
       }
     }
+    // print overall results
+    // console.log('overall rankings')
+    // const overallRankings = eventsDict['overall'];
+
     // TODO: uncomment later
     const res = await batchUpdateSlides(token, presentationId, requestList);
     console.log(res);
