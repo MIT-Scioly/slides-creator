@@ -4,8 +4,11 @@ import {
   createPresentation,
   getPresentationObject,
   insertTextWithDataRequest,
-  createNewSlideWithDataRequest, batchUpdateSlides, deleteTextWithIdRequest
+  createNewSlideWithDataRequest, batchUpdateSlides, deleteTextWithIdRequest,
+  createNewTitleOnlySlide, addAwardsTextBoxes,
+  duplicateHeaderSlide
 } from './slideHandler';
+import {v4 as uuidv4} from 'uuid';
 
 export default function Slides({csvData}) {
   const [user, setUser] = useState(null);
@@ -104,6 +107,7 @@ export default function Slides({csvData}) {
     let ttId, bdId;
     if (token && presentationId) {
       const json = await getPresentation();
+      console.log("json slides", json.slides);
       const first_slide = json.slides[0];
       ttId = first_slide.pageElements[0].objectId;
       bdId = first_slide.pageElements[1].objectId;
@@ -114,14 +118,16 @@ export default function Slides({csvData}) {
   }
 
   const addSlideFromCsv = async (token, presentationId) => {
-    const {titleId, bodyId} = await getFirstSlideObjects();
+    const presentation = await getPresentation();
     const requestList = [];
-    requestList.push(insertTextWithDataRequest(titleId, 'Science Olympiad Results'));
-    requestList.push(insertTextWithDataRequest(bodyId, 'MIT'));
     if (csvData) {
       for (let i = 0; i < csvData.length; i++) {
-        // for (let i = 0; i < 3; i++) {
-        requestList.push(createNewSlideWithDataRequest(csvData[i]['Event'], rankingsTransform(csvData[i]['Rankings'])));
+        const slide_id = uuidv4();
+        requestList.push(createNewTitleOnlySlide(slide_id, csvData[i]['Event']));
+        const awardsText = rankingsTransformTest(csvData[i]['Rankings']);
+        for (let j = awardsText.length - 1; j >= 0; j--) {
+          requestList.push(addAwardsTextBoxes(slide_id, j + 1, awardsText[j]));
+        }
       }
     } else {
       console.log("No data");
@@ -132,12 +138,20 @@ export default function Slides({csvData}) {
   }
 
   const rankingsTransform = (rankings) => {
-    const res = rankings
+    const res = rankings;
     let res_str = "";
     for (let i = 0; i < res.length; i++) {
       res_str += i + 1 + ". " + res[i] + "\n";
     }
     return res_str;
+  }
+
+  const rankingsTransformTest = (rankings) => {
+    const res = [];
+    for (let i = 0; i < rankings.length; i++) {
+      res.push((i + 1) + ". " + rankings[i]);
+    }
+    return res;
   }
 
   return (
@@ -153,9 +167,9 @@ export default function Slides({csvData}) {
           <a href={`https://docs.google.com/presentation/d/${presentationId}/edit`} target="_blank" rel="noreferrer">Open
             Presentation Link</a>
           <p/>
-          {/*<button onClick={() => createNewPresentation("SciOly Results")}>Create Presentation</button>*/}
+          <button onClick={() => createNewPresentation("SciOly Results")}>Create Presentation</button>
           <p/>
-          {/*<button onClick={() => addSlideFromCsv(token, presentationId)}>Generate Slides from CSV</button>*/}
+          <button onClick={() => addSlideFromCsv(token, presentationId)}>Generate Slides from CSV</button>
           <p/>
           <button onClick={() => fetchPresentation()}>Get Presentation</button>
         </div>}

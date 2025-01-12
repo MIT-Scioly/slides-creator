@@ -45,9 +45,9 @@ export default function CsvLoader({setCsvData, excludeText}) {
     const res = events.map((event) =>
       ({'Event': event, 'Rankings': getTop(df, event, 6)})
     )
+    res.push(res.shift()); // moves 'Overall' to the end
     setCsvData(res);
-    console.log(res)
-    return res
+    return res;
   }
 
   return (
